@@ -30,7 +30,11 @@ h6 {
 }
 
 .card {
-  @apply p-5 rounded-lg bg-white shadow-lg;
+  @apply p-5 rounded-lg shadow-lg;
+}
+
+.error {
+  @apply max-w-2xl w-[90%] mx-auto bg-purple-400 text-blue-800 text-xl text-center font-bold;
 }
 
 @media (prefers-color-scheme: dark) {
