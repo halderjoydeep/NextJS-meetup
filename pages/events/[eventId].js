@@ -19,7 +19,7 @@ export default function EventDetailPage() {
 
   return (
     <Layout title={event.title}>
-      <EventSummary />
+      <EventSummary title={event.title} />
       <EventLogistics
         image={event.image}
         title={event.title}
