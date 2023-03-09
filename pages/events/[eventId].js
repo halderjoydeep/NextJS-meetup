@@ -2,21 +2,9 @@ import { useRouter } from 'next/router';
 import { EventLogistics, EventSummary } from '../../components/event-details';
 import EventContent from '../../components/event-details/EventContent';
 import { Layout } from '../../components/ui';
-import { getEventById } from '../../utils/dummy-data';
+import { getFeaturedEvents, getEventById } from '../../utils/api-util';
 
-export default function EventDetailPage() {
-  const router = useRouter();
-  const { eventId } = router.query;
-
-  const event = getEventById(eventId);
-  if (!event) {
-    return (
-      <Layout title="Error">
-        <p className="card error mt-16">No events found</p>
-      </Layout>
-    );
-  }
-
+export default function EventDetailPage({ event }) {
   return (
     <Layout title={event.title}>
       <EventSummary title={event.title} />
@@ -29,4 +17,26 @@ export default function EventDetailPage() {
       <EventContent description={event.description} />
     </Layout>
   );
+}
+
+export async function getStaticProps(context) {
+  const { eventId } = context.params;
+  return getEventById(eventId).then((event) => {
+    if (!event) {
+      return {
+        notFound: true,
+      };
+    }
+    return {
+      props: { event },
+      revalidate: 60,
+    };
+  });
+}
+
+export async function getStaticPaths() {
+  return getFeaturedEvents().then((events) => ({
+    paths: events.map((event) => ({ params: { eventId: event.id } })),
+    fallback: 'blocking',
+  }));
 }
