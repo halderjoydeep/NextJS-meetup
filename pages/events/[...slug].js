@@ -15,14 +15,14 @@ export default function FilteredEventsPage({ events, hasError, date }) {
 
   if (events.length === 0) {
     return (
-      <Layout title="Oops! No event">
+      <Layout title="Oops! No event" description={`events in ${date}`}>
         <p className="card error mt-16">No events found.</p>
       </Layout>
     );
   }
 
   return (
-    <Layout title="Filtered Events">
+    <Layout title="Filtered Events" description={`events in ${date}`}>
       <h1 className="max-w-2xl w-[90%] mx-auto card bg-white text-2xl font-bold text-center mt-8">
         Events in {date}
       </h1>

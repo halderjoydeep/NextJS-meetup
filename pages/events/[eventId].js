@@ -6,7 +6,7 @@ import { getFeaturedEvents, getEventById } from '../../utils/api-util';
 
 export default function EventDetailPage({ event }) {
   return (
-    <Layout title={event.title}>
+    <Layout title={event.title} description={event.description}>
       <EventSummary title={event.title} />
       <EventLogistics
         image={event.image}
