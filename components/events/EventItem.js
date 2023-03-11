@@ -1,13 +1,13 @@
-/* eslint-disable @next/next/no-img-element */
 import { Button } from '../ui';
 import {
   IoCalendarClear,
   IoLocationSharp,
   IoArrowForwardOutline,
 } from 'react-icons/io5';
+import Image from 'next/image';
 
 export default function EventItem({ event }) {
-  const { date, image, location, id, name, title } = event;
+  const { date, image, location, id, title } = event;
   const formattedDate = new Date(date).toLocaleDateString('en-IN', {
     weekday: 'long',
     day: 'numeric',
@@ -19,9 +19,11 @@ export default function EventItem({ event }) {
 
   return (
     <li className="card my-4 grid sm:grid-cols-5 gap-8 bg-white">
-      <img
+      <Image
         src={'/' + image}
-        alt={name}
+        alt={title}
+        width={250}
+        height={200}
         className="sm:col-span-2 object-cover h-[200px] w-full rounded-md"
       />
 
