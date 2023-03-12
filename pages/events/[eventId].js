@@ -1,7 +1,10 @@
-import { useRouter } from 'next/router';
-import { EventLogistics, EventSummary } from '../../components/event-details';
-import EventContent from '../../components/event-details/EventContent';
 import { Layout } from '../../components/ui';
+import {
+  EventLogistics,
+  EventSummary,
+  EventContent,
+} from '../../components/event-details';
+import Comment from '../../components/input/Comment';
 import { getFeaturedEvents, getEventById } from '../../utils/api-util';
 
 export default function EventDetailPage({ event }) {
@@ -15,6 +18,7 @@ export default function EventDetailPage({ event }) {
         address={event.location}
       />
       <EventContent description={event.description} />
+      <Comment eventId={event.id} />
     </Layout>
   );
 }

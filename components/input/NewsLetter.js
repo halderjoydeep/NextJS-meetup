@@ -7,6 +7,11 @@ export default function NewsLetter() {
     event.preventDefault();
     const email = emailRef.current.value;
 
+    if (email.trim() === '') {
+      alert("Email can't be empty!");
+      return;
+    }
+
     fetch('/api/newsletter', {
       method: 'POST',
       body: JSON.stringify({ email }),
@@ -15,7 +20,10 @@ export default function NewsLetter() {
       },
     })
       .then((response) => response.json())
-      .then((data) => console.log(data));
+      .then((data) => {
+        alert(data.message);
+        emailRef.current.value = '';
+      });
   }
 
   return (
