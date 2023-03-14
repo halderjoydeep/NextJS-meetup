@@ -1,8 +1,15 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import React from 'react';
+import React, { useContext } from 'react';
+import NotificationContext from '../../store/notification-context';
+import Header from './Header';
+import Notification from './Notification';
 
 export default function Layout({ children, title, description }) {
+  const notificationCtx = useContext(NotificationContext);
+
+  const { notification } = notificationCtx;
+
   return (
     <>
       <Head>
@@ -12,17 +19,9 @@ export default function Layout({ children, title, description }) {
           content={description || 'Lot of great events to explore'}
         />
       </Head>
-      <header className="w-screen py-4 px-[10%] flex items-center justify-between bg-slate-900 shadow-md ">
-        <Link href="/" className="text-2xl font-bold text-teal-200">
-          Events
-        </Link>
-        <nav>
-          <Link href="/events" className="text-xl font-semibold text-teal-400">
-            All events
-          </Link>
-        </nav>
-      </header>
+      <Header />
       <main>{children}</main>
+      {notification && <Notification notification={notification} />}
     </>
   );
 }

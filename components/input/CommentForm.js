@@ -1,10 +1,12 @@
-import React, { useRef } from 'react';
-import { Button } from '../ui';
+import React, { useContext, useRef } from 'react';
+import NotificationContext from '../../store/notification-context';
 
 export default function CommentForm({ eventId, loadComments }) {
   const nameRef = useRef();
   const emailRef = useRef();
   const commentRef = useRef();
+
+  const { showNotification } = useContext(NotificationContext);
 
   function submitHandler(event) {
     event.preventDefault();
@@ -17,22 +19,37 @@ export default function CommentForm({ eventId, loadComments }) {
       return;
     }
 
+    showNotification('pending', 'Commenting!', 'Submitting the comment...');
+
     fetch(`/api/comments/${eventId}`, {
       method: 'POST',
       body: JSON.stringify({ name, email, comment }),
       headers: {
         'Content-Type': 'application/json',
       },
-    }).then((res) => {
-      if (res.status === 422) {
-        alert('Invalid Inputs');
-      }
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          return res.json();
+        }
 
-      nameRef.current.value = '';
-      emailRef.current.value = '';
-      commentRef.current.value = '';
-      loadComments();
-    });
+        const data = await res.json();
+        throw new Error(data.message);
+      })
+      .then((data) => {
+        showNotification('success', 'Commented!', data.message);
+        nameRef.current.value = '';
+        emailRef.current.value = '';
+        commentRef.current.value = '';
+        loadComments();
+      })
+      .catch((err) => {
+        showNotification(
+          'error',
+          'Error!',
+          err.message || 'Something went wrong'
+        );
+      });
   }
 
   return (

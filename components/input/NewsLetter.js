@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
+import NotificationContext from '../../store/notification-context';
 
 export default function NewsLetter() {
   const emailRef = useRef();
+  const { showNotification } = useContext(NotificationContext);
 
   function submitHandler(event) {
     event.preventDefault();
@@ -12,6 +14,12 @@ export default function NewsLetter() {
       return;
     }
 
+    showNotification(
+      'pending',
+      'Signing up...',
+      'Newsletter subsciption in the process'
+    );
+
     fetch('/api/newsletter', {
       method: 'POST',
       body: JSON.stringify({ email }),
@@ -19,10 +27,24 @@ export default function NewsLetter() {
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        if (response.ok) {
+          return response.json();
+        }
+
+        const data = await response.json();
+        throw new Error(data.message);
+      })
       .then((data) => {
-        alert(data.message);
+        showNotification('success', 'Success!', data.message);
         emailRef.current.value = '';
+      })
+      .catch((err) => {
+        showNotification(
+          'error',
+          'Error!',
+          err.message || 'Something went wrong'
+        );
       });
   }
 

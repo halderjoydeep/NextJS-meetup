@@ -1,18 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+import { connectDatabase, insertDocument } from '../../utils/db-util';
 
-export function buildNewsletterPath() {
-  const filePath = path.join(process.cwd(), 'data', 'newsletter.json');
-  return filePath;
-}
-
-export function getData(filePath) {
-  const fileData = fs.readFileSync(filePath);
-  const data = JSON.parse(fileData);
-  return data;
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { email } = req.body;
     if (!email || email.trim() === '' || !email.includes('@')) {
@@ -20,10 +8,23 @@ export default function handler(req, res) {
       return;
     }
 
-    const filePath = buildNewsletterPath();
-    const data = getData(filePath);
-    data.push(email);
-    fs.writeFileSync(filePath, JSON.stringify(data));
-    res.status(201).json({ message: 'subscribed' });
+    let client;
+    // Connecting to Database
+    try {
+      client = await connectDatabase();
+    } catch (err) {
+      res.status(500).json({ message: 'Connecting to Database failed' });
+      return;
+    }
+
+    // Inserting Document
+    try {
+      await insertDocument(client, 'newsletter', { email });
+      client.close();
+      res.status(201).json({ message: 'Newsletter subscribed' });
+    } catch (err) {
+      res.status(500).json({ message: 'Subcription failed.' });
+      return;
+    }
   }
 }

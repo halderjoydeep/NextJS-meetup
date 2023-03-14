@@ -6,11 +6,16 @@ import CommentList from './CommentList';
 export default function Comment({ eventId }) {
   const [showComment, setShowComment] = useState(false);
   const [commentList, setCommentList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadComments = useCallback(() => {
+    setIsLoading(true);
     fetch(`/api/comments/${eventId}`)
       .then((res) => res.json())
-      .then((data) => setCommentList(data.commentList));
+      .then((data) => {
+        setIsLoading(false);
+        setCommentList(data.commentList);
+      });
   }, [eventId]);
 
   function toggleComments() {
@@ -31,7 +36,7 @@ export default function Comment({ eventId }) {
       {showComment && (
         <CommentForm eventId={eventId} loadComments={loadComments} />
       )}
-      {showComment && <CommentList list={commentList} />}
+      {showComment && <CommentList list={commentList} isLoading={isLoading} />}
     </section>
   );
 }

@@ -1,27 +1,23 @@
-import fs from 'fs';
-import path from 'path';
+import {
+  connectDatabase,
+  getDocument,
+  insertDocument,
+} from '../../../utils/db-util';
 
-export function buildCommentsPath() {
-  const filePath = path.join(process.cwd(), 'data', 'comments.json');
-  return filePath;
-}
-
-export function getData(filePath) {
-  const fileData = fs.readFileSync(filePath);
-  const data = JSON.parse(fileData);
-  return data;
-}
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   const { eventId } = req.query;
 
-  if (req.method === 'GET') {
-    const filePath = buildCommentsPath();
-    const data = getData(filePath);
-    const commentList = data[eventId] || [];
+  let client;
 
-    res.status(200).json({ commentList });
-  } else if (req.method === 'POST') {
+  // Connecting to database
+  try {
+    client = await connectDatabase();
+  } catch (err) {
+    res.status(500).json({ message: 'Connection to database failed' });
+    return;
+  }
+
+  if (req.method === 'POST') {
     const { name, email, comment } = req.body;
 
     if (
@@ -33,25 +29,39 @@ export default function handler(req, res) {
       comment.trim() === ''
     ) {
       res.status(422).json({ message: 'Invalid Inputs' });
+      client.close();
       return;
     }
 
     const newComment = {
-      id: new Date().toISOString(),
       name,
       email,
       comment,
+      eventId,
     };
 
-    const filePath = buildCommentsPath();
-    const data = getData(filePath);
-
-    const commentList = data[eventId] || [];
-    commentList.push(newComment);
-
-    data[eventId] = commentList;
-
-    fs.writeFileSync(filePath, JSON.stringify(data));
-    res.status(201).json({ message: 'Added comment' });
+    // Inserting document to database
+    try {
+      await insertDocument(client, 'comments', newComment);
+      res.status(201).json({ message: 'Comment added successfully' });
+    } catch (err) {
+      res.status(500).json({ message: 'Adding comment failed' });
+    }
+  } else if (req.method === 'GET') {
+    // Getting documents from database
+    try {
+      const commentList = await getDocument(
+        client,
+        { eventId: eventId },
+        { _id: -1 }
+      );
+      res.status(200).json({ commentList });
+    } catch (err) {
+      res
+        .status(500)
+        .json({ message: 'Fetching comment failed', commentList: [] });
+    }
   }
+
+  client.close();
 }
